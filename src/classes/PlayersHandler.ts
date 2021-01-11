@@ -1,26 +1,45 @@
 import { Document } from "mongoose";
-import { InterfacePlayer } from "../inerfaces";
+import { InterfacePlayer, InterfacePlayerDocument, InterfacePlayerSelector } from "../inerfaces";
 import Player from "./Player";
 
 class PlayersHandler {
-    private players: Array<Document<InterfacePlayer>> = [];
+    private playersDb: Array<InterfacePlayerDocument> = [];
     constructor() {};
     
-    public getPlayer(index: number): Document<InterfacePlayer> {
-        return this.players[index];
+    public addPlayer(player: InterfacePlayerDocument): void {
+        this.playersDb.push(player);
     }
     
-    public addPlayer(player: Document<InterfacePlayer>): void {
-        this.players.push(player);
+    public importPlayers(playersDb: Array<InterfacePlayerDocument>): void {
+        this.playersDb = playersDb;
     }
-
-    public importPlayers(players: Array<Document<InterfacePlayer>>): void {
-        this.players = this.players.concat(players);
-    }
-
+    
     public clearPlayers(): void {
-        this.players = [];
+        this.playersDb = [];
     }
+
+    public getPlayer(index: number): InterfacePlayerDocument | InterfacePlayer {
+        return this.playersDb[index];
+    }
+
+    // // get PlayersDb:
+
+    // public getPlayersCollection(selector: InterfacePlayerSelector): Array<InterfacePlayerDocument> {
+    //     return this.playersDb.filter((player) => {
+    //         if(
+    //             (() => {//IIF
+    //                 Object.keys(selector).forEach((selectorKey: keyof InterfacePlayer | string) => {
+    //                     if(selector[selectorKey as keyof InterfacePlayer] !== player[selectorKey as keyof InterfacePlayer]) {
+    //                         return false;
+    //                     }
+    //                 });
+    //                 return true;
+    //             })()
+    //         ) {
+
+    //         }
+    //     })
+    // }
 }
 
 export default PlayersHandler;

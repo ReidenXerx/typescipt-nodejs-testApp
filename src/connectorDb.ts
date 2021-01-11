@@ -35,7 +35,7 @@ export const connect = async () => {
 import mongoose from 'mongoose';
 import { Document as DocumentType, CallbackError} from 'mongoose';
 import { rejects } from "assert";
-import { InterfacePlayer } from './inerfaces';
+import { InterfacePlayer, InterfacePlayerDocument, InterfacePlayerModel } from './inerfaces';
 import Player from './classes/Player';
 
 const mockDB: Array<Player> = [];
@@ -97,12 +97,19 @@ const playerSchema = new mongoose.Schema({
     },
 });
 
-const playerModel = mongoose.model('Players', playerSchema);
+playerSchema.methods.getOnline = function () {
+    this.get('online');
+}
+
+const playerModel: InterfacePlayerModel = mongoose.model<InterfacePlayerDocument, InterfacePlayerModel>('Players', playerSchema);
+playerModel.find({}, (err, docs) => {
+    docs[0].online
+},)
 
 const dbInsert = (player: InterfacePlayer) => {
-    return new Promise<DocumentType<InterfacePlayer>>((resolve, reject) => {
+    return new Promise<InterfacePlayerDocument>((resolve, reject) => {
         playerModel.create(
-            player, (err: mongoose.CallbackError, doc: DocumentType<InterfacePlayer>) => {
+            player, (err: mongoose.CallbackError, doc: InterfacePlayerDocument) => {
                 console.log(`creating...`);
                 
                 if (err) {
@@ -116,22 +123,41 @@ const dbInsert = (player: InterfacePlayer) => {
             }
         )
     });
-}
+};
+
+// const dbUpdate = (player: InterfacePlayer) => {
+//     return new Promise<DocumentType<InterfacePlayer&{_id: string}>>((resolve, reject) => {
+//         playerModel.updateMany(
+//             player, (err: mongoose.CallbackError, doc: DocumentType<InterfacePlayer>) => {
+//                 console.log(`creating...`);
+                
+//                 if (err) {
+//                     console.log(err);
+//                     reject(err);
+//                 } else {
+//                     console.log(doc);
+//                     console.log(`saved`);
+//                     resolve(doc);
+//                 }
+//             }
+//         )
+//     });
+// }
 
 const dbSelect = (selector: Object = {}) => {
-    return new Promise<Array<DocumentType<InterfacePlayer>>>((resolve, reject) => {
-        playerModel.find(selector, (err, docs: Array<mongoose.Document<InterfacePlayer>>) => {
+    return new Promise<Array<InterfacePlayerDocument>>((resolve, reject) => {
+        playerModel.find(selector, (err, docs: Array<InterfacePlayerDocument>) => {
             if (err) {
                 console.log(`Something went wrong...`);
                 console.log(err);
                 reject(err);
             } else {
                 console.log(`Successfully got from server...`);
-                docs.filter((doc) => console.log(doc));
+                //docs.filter((doc) => console.log(doc));
                 resolve(docs);
             }
         })
     });
-}
+};
 
 export { dbInsert, dbSelect };

@@ -5,6 +5,7 @@ class Route {
         private path: string,
         private callback: Function,
         private middleware?: Middleware,
+        
     ) {};
 
     get Path() {

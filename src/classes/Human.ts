@@ -1,4 +1,4 @@
-import { InterfaceHuman, InterfacePlanet } from "../inerfaces";
+import { InterfaceHuman, InterfacePlanet } from "../interfaces";
 
 abstract class Human implements InterfaceHuman {
     sex: 'male' | 'female' = 'male';

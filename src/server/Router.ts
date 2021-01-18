@@ -5,14 +5,13 @@ import { ParsedUrlQuery } from "querystring";
 import { UrlWithParsedQuery } from "url";
 import Route from "./Route";
 import PlayersHandler from "../classes/PlayersHandler";
-import mockDB from "../connectorDb";
-import { InterfacePlayerDocument } from "../inerfaces";
+import { InterfacePlayer } from "../interfaces";
 
 import { PORT } from "../index";
 
 class Router {
     public playersHandler: PlayersHandler = new PlayersHandler();
-    public playersDb: Array<InterfacePlayerDocument> = [];
+    public playersDb: Array<InterfacePlayer> = [];
     private routes: Array<Route> = [];
     private port: number = PORT;
 
@@ -44,7 +43,6 @@ class Router {
                     });
                     reject("no routes");
                 }).then((result) => {
-                    console.log(result, "RESULT")
                     response.write(
                         JSON.stringify(result)
                     );

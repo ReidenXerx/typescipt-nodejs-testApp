@@ -32,132 +32,54 @@ export const connect = async () => {
 };
 */
 
-import mongoose from 'mongoose';
+import mongodb, { MongoClient } from 'mongodb';
 import { Document as DocumentType, CallbackError} from 'mongoose';
 import { rejects } from "assert";
-import { InterfacePlayer, InterfacePlayerDocument, InterfacePlayerModel } from './inerfaces';
+import { InterfacePlayer, InterfacePlayerSelector } from './interfaces';
 import Player from './classes/Player';
 
-const mockDB: Array<Player> = [];
+const url = 'mongodb://localhost:27017/FOOTBALL_PLAYERS';
 
-mockDB.push(new Player(
-    'Alisson',
-    'Bekker',
-    'Liverpool',
-    new Date('10.02.1985'),
-    true,
-).setId('1'));
-
-mockDB.push(new Player(
-    'Sadio',
-    'Mane',
-    'Liverpool',
-    new Date('15.03.1995'),
-    true,
-).setId('2'));
-
-mockDB.push(new Player(
-    'Raynor',
-    'John',
-    'Starcraft',
-    new Date('20.08.2085'),
-    true,
-).setId('1'));
-
-export default mockDB;
-
-mongoose.connect('mongodb://localhost:27017/FOOTBALL_PLAYERS', {
-    useCreateIndex: true,
+const mongoClient = new MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-}, () => {
-    console.log(`connected to database`);
-})
+});
+console.log(`log`);
 
-const playerSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    secondName: {
-        type: String,
-        required: true,
-    },
-    team: {
-        type: String,
-        required: true,
-    },
-    birthday: {
-        type: Date,
-        required: true,
-    },
-    online: {
-        type: Boolean,
-        required: true,
-    },
+mongoClient.connect(() => {
+    console.log(`connected to database`);
 });
 
-playerSchema.methods.getOnline = function () {
-    this.get('online');
-}
-
-const playerModel: InterfacePlayerModel = mongoose.model<InterfacePlayerDocument, InterfacePlayerModel>('Players', playerSchema);
-playerModel.find({}, (err, docs) => {
-    docs[0].online
-},)
-
-const dbInsert = (player: InterfacePlayer) => {
-    return new Promise<InterfacePlayerDocument>((resolve, reject) => {
-        playerModel.create(
-            player, (err: mongoose.CallbackError, doc: InterfacePlayerDocument) => {
-                console.log(`creating...`);
-                
-                if (err) {
-                    console.log(err);
-                    reject(err);
-                } else {
-                    console.log(doc);
-                    console.log(`saved`);
-                    resolve(doc);
-                }
-            }
-        )
+const dbSelect = (player: InterfacePlayerSelector = {}) => new Promise<Array<InterfacePlayer>>((resolve, reject) => {
+    const db = mongoClient.db("FOOTBALL_PLAYERS");
+    const collection = db.collection("players");
+     
+    collection.find().toArray(function(err, results: Array<InterfacePlayer>){
+                 
+        resolve(results);
+        //mongoClient.close();
     });
-};
+});
 
-// const dbUpdate = (player: InterfacePlayer) => {
-//     return new Promise<DocumentType<InterfacePlayer&{_id: string}>>((resolve, reject) => {
-//         playerModel.updateMany(
-//             player, (err: mongoose.CallbackError, doc: DocumentType<InterfacePlayer>) => {
-//                 console.log(`creating...`);
-                
-//                 if (err) {
-//                     console.log(err);
-//                     reject(err);
-//                 } else {
-//                     console.log(doc);
-//                     console.log(`saved`);
-//                     resolve(doc);
-//                 }
-//             }
-//         )
-//     });
-// }
 
-const dbSelect = (selector: Object = {}) => {
-    return new Promise<Array<InterfacePlayerDocument>>((resolve, reject) => {
-        playerModel.find(selector, (err, docs: Array<InterfacePlayerDocument>) => {
-            if (err) {
-                console.log(`Something went wrong...`);
-                console.log(err);
-                reject(err);
-            } else {
-                console.log(`Successfully got from server...`);
-                //docs.filter((doc) => console.log(doc));
-                resolve(docs);
-            }
-        })
+const dbInsert = (players: Array<InterfacePlayer>) => new Promise((resolve, reject) => {
+    const db = mongoClient.db("FOOTBALL_PLAYERS");
+    const collection = db.collection("players");
+     
+    collection.insertMany(players, function(err, results){
+                 
+        resolve(results);
+        mongoClient.close();
     });
-};
+});
 
-export { dbInsert, dbSelect };
+const dbUpdate = (playerSelector: InterfacePlayerSelector, playerUpdate: InterfacePlayer) => new Promise((resolve, reject) => {
+    const db = mongoClient.db("FOOTBALL_PLAYERS");
+    const collection = db.collection("players");
+     
+    collection.updateOne(playerSelector, playerUpdate).then((result) => {
+        resolve(result);
+    });
+});
+
+export { dbSelect, dbInsert, dbUpdate };

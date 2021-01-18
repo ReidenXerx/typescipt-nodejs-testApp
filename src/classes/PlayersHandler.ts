@@ -1,16 +1,16 @@
 import { Document } from "mongoose";
-import { InterfacePlayer, InterfacePlayerDocument, InterfacePlayerSelector } from "../inerfaces";
+import { InterfacePlayer } from "../interfaces";
 import Player from "./Player";
 
 class PlayersHandler {
-    private playersDb: Array<InterfacePlayerDocument> = [];
+    private playersDb: Array<InterfacePlayer> = [];
     constructor() {};
     
-    public addPlayer(player: InterfacePlayerDocument): void {
+    public addPlayer(player: InterfacePlayer): void {
         this.playersDb.push(player);
     }
     
-    public importPlayers(playersDb: Array<InterfacePlayerDocument>): void {
+    public importPlayers(playersDb: Array<InterfacePlayer>): void {
         this.playersDb = playersDb;
     }
     
@@ -18,7 +18,7 @@ class PlayersHandler {
         this.playersDb = [];
     }
 
-    public getPlayer(index: number): InterfacePlayerDocument | InterfacePlayer {
+    public getPlayer(index: number): InterfacePlayer {
         return this.playersDb[index];
     }
 

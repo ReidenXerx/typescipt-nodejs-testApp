@@ -1,5 +1,4 @@
-import { InterfacePlayer } from "../inerfaces";
-import Human from "./Human";
+import { InterfacePlayer } from "../interfaces";
 
 class Player implements InterfacePlayer {
     public _id?: string;
@@ -9,7 +8,7 @@ class Player implements InterfacePlayer {
     public birthday: Date,
     public online: Boolean) {};
 
-    setId(id: string): Player { //документация лайфхака
+    setId(id: string): Player {
         this._id = id;
         return this;
     }

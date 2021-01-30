@@ -1,4 +1,4 @@
-/*import * as mssql from 'mssql/msnodesqlv8';
+/* import * as mssql from 'mssql/msnodesqlv8';
 import sql from 'mssql/msnodesqlv8';
 import { config } from 'mssql/msnodesqlv8';
 
@@ -27,14 +27,14 @@ export const connect = async () => {
     } catch (err) {
         // ... error checks
         console.log(err);
-        
+
     }
 };
 */
 
 import mongodb, { MongoClient } from 'mongodb';
-import { Document as DocumentType, CallbackError} from 'mongoose';
-import { rejects } from "assert";
+import { Document as DocumentType, CallbackError } from 'mongoose';
+import { rejects } from 'assert';
 import { InterfacePlayer, InterfacePlayerSelector } from './interfaces';
 import Player from './classes/Player';
 
@@ -46,33 +46,32 @@ const mongoClient = new MongoClient(url, {
 });
 
 mongoClient.connect(() => {
-    console.log(`connected to database`);
+    console.log('connected to database');
 });
 
 const dbSelect = (player: InterfacePlayerSelector = {}) => new Promise<Array<InterfacePlayer>>((resolve, reject) => {
-    const db = mongoClient.db("FOOTBALL_PLAYERS");
-    const collection = db.collection("players");
-     
-    collection.find().toArray(function(err, results: Array<InterfacePlayer>) {
+    const db = mongoClient.db('FOOTBALL_PLAYERS');
+    const collection = db.collection('players');
+
+    collection.find().toArray((err, results: Array<InterfacePlayer>) => {
         resolve(results);
     });
 });
 
-
 const dbInsert = (players: Array<InterfacePlayer>) => new Promise((resolve, reject) => {
-    const db = mongoClient.db("FOOTBALL_PLAYERS");
-    const collection = db.collection("players");
-     
-    collection.insertMany(players, function(err, results) { 
+    const db = mongoClient.db('FOOTBALL_PLAYERS');
+    const collection = db.collection('players');
+
+    collection.insertMany(players, (err, results) => {
         resolve(results);
         mongoClient.close();
     });
 });
 
 const dbUpdate = (playerSelector: InterfacePlayerSelector, playerUpdate: InterfacePlayer) => new Promise((resolve, reject) => {
-    const db = mongoClient.db("FOOTBALL_PLAYERS");
-    const collection = db.collection("players");
-     
+    const db = mongoClient.db('FOOTBALL_PLAYERS');
+    const collection = db.collection('players');
+
     collection.updateOne(playerSelector, playerUpdate).then((result) => {
         resolve(result);
     });

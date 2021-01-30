@@ -1,19 +1,20 @@
-import { Document } from "mongoose";
-import { InterfacePlayer } from "../interfaces";
-import Player from "./Player";
+import { Document } from 'mongoose';
+import { InterfacePlayer } from '../interfaces';
+import Player from './Player';
 
 class PlayersHandler {
     private playersDb: Array<InterfacePlayer> = [];
-    constructor() {};
-    
+
+    constructor() {}
+
     public addPlayer(player: InterfacePlayer): void {
         this.playersDb.push(player);
     }
-    
+
     public importPlayers(playersDb: Array<InterfacePlayer>): void {
         this.playersDb = playersDb;
     }
-    
+
     public clearPlayers(): void {
         this.playersDb = [];
     }

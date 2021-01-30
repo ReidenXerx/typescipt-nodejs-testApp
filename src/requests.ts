@@ -1,8 +1,7 @@
-import { format, parse } from "url";
-import { PORT } from "./classes/constants";
-import { InterfacePlayer, InterfacePlayerSelector } from "./interfaces";
-import { request, RequestOptions } from "http";
-
+import { format, parse } from 'url';
+import { request, RequestOptions } from 'http';
+import { PORT } from './classes/constants';
+import { InterfacePlayer, InterfacePlayerSelector } from './interfaces';
 
 const requestAdd = parse(format({
     protocol: 'http',
@@ -16,7 +15,7 @@ const requestAdd = parse(format({
             team: 'teamless',
             birthday: new Date('10.05.1995'),
             online: true,
-        } as InterfacePlayer)
+        } as InterfacePlayer),
     },
 }));
 
@@ -24,15 +23,13 @@ const requestGET = (options: RequestOptions) => {
     let output = '';
 
     const req = request(options, (res) => {
-
         res.on('data', (chunk) => {
             output += chunk;
         });
 
         res.on('end', () => {
-            let obj = JSON.parse(output);
+            const obj = JSON.parse(output);
             console.log(obj);
-            
         });
     });
 
@@ -41,7 +38,7 @@ const requestGET = (options: RequestOptions) => {
     });
 
     req.end();
-}
+};
 
 const requestUpdate = parse(format({
     protocol: 'http',
@@ -56,8 +53,8 @@ const requestUpdate = parse(format({
         ),
         selector: JSON.stringify(
             {
-                name: `Mihail`,
-                secondName: `Giant`,
+                name: 'Mihail',
+                secondName: 'Giant',
             } as InterfacePlayerSelector,
         ),
     },

@@ -1,25 +1,26 @@
-import { ClientRequest, get, IncomingMessage, request } from "http";
-import { InterfacePlayer, InterfacePlayerSelector } from "./interfaces";
-import { importDocs, insertDocs } from "./routes";
-import { requestImport, requestUpdate } from "./requests";
-import Route from "./server/Route";
-import Router from "./server/Router";
+import {
+    ClientRequest, get, IncomingMessage, request,
+} from 'http';
+import { InterfacePlayer } from './interfaces';
+import { importDocs, insertDocs } from './routes';
+import { requestImport } from './requests';
+import Router from './server/Router';
 
 const router: Router = new Router();
 router.startServer();
 router.addRoute(importDocs(router));
 router.addRoute(insertDocs(router));
 
-var stdin = process.openStdin();
-var stdinSecond = process.openStdin();
+const stdin = process.openStdin();
+const stdinSecond = process.openStdin();
 
-stdin.addListener("data", function(d) { 
-    switch(d.toString().trim()) {
+stdin.addListener('data', (d) => {
+    switch (d.toString().trim()) {
         case 'insert': {
             stdinSecond.addListener('data', (object) => {
                 const inputed = object.toString().trim();
                 let req: ClientRequest | null = null;
-                if(inputed) {
+                if (inputed) {
                     req = request({
                         hostname: requestImport.hostname,
                         port: requestImport.port,
@@ -50,31 +51,30 @@ stdin.addListener("data", function(d) {
                                     birthday: new Date('10.05.1995'),
                                     online: true,
                                 } as InterfacePlayer,
-                            ]
+                            ],
                         )
                     );
                     req.end();
-                };
-
+                }
             });
             break;
-        };
+        }
         case 'import': {
             get({
                 hostname: requestImport.hostname,
                 port: requestImport.port,
                 path: requestImport.path,
-            },  (res) => {
-                 res.on('data', (response) => {
+            }, (res) => {
+                res.on('data', (response) => {
                     const data = JSON.parse(response);
-                    console.log(`Got from server after import`);
-                    console.log(data); 
-                    console.log(`DB list:`);
+                    console.log('Got from server after import');
+                    console.log(data);
+                    console.log('DB list:');
                 });
             });
             break;
-        };
+        }
     }
-    console.log("you entered: [" + 
-        d.toString().trim() + "]");
-  });
+    console.log(`you entered: [${
+        d.toString().trim()}]`);
+});

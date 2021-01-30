@@ -5,7 +5,7 @@ export interface InterfacePlayer {
     team: string,
     birthday: Date,
     online: Boolean,
-};
+}
 
 export interface InterfacePlayerSelector {
     _id?: string,
@@ -14,4 +14,4 @@ export interface InterfacePlayerSelector {
     team?: string,
     birthday?: Date,
     online?: Boolean,
-};
+}

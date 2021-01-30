@@ -1,12 +1,13 @@
-import { InterfacePlayer } from "../interfaces";
+import { InterfacePlayer } from '../interfaces';
 
 class Player implements InterfacePlayer {
     public _id?: string;
-    constructor(public name: string,//задокумментировать public
-    public secondName: string,
-    public team: string,
-    public birthday: Date,
-    public online: Boolean) {};
+
+    constructor(public name: string, // задокумментировать public
+        public secondName: string,
+        public team: string,
+        public birthday: Date,
+        public online: Boolean) {}
 
     setId(id: string): Player {
         this._id = id;
@@ -15,7 +16,7 @@ class Player implements InterfacePlayer {
 
     toggleOnline(): void {
         this.online = !this.online;
-    };
+    }
 }
 
 export default Player;

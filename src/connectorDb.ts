@@ -44,7 +44,6 @@ const mongoClient = new MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
-console.log(`log`);
 
 mongoClient.connect(() => {
     console.log(`connected to database`);
@@ -54,10 +53,8 @@ const dbSelect = (player: InterfacePlayerSelector = {}) => new Promise<Array<Int
     const db = mongoClient.db("FOOTBALL_PLAYERS");
     const collection = db.collection("players");
      
-    collection.find().toArray(function(err, results: Array<InterfacePlayer>){
-                 
+    collection.find().toArray(function(err, results: Array<InterfacePlayer>) {
         resolve(results);
-        //mongoClient.close();
     });
 });
 
@@ -66,8 +63,7 @@ const dbInsert = (players: Array<InterfacePlayer>) => new Promise((resolve, reje
     const db = mongoClient.db("FOOTBALL_PLAYERS");
     const collection = db.collection("players");
      
-    collection.insertMany(players, function(err, results){
-                 
+    collection.insertMany(players, function(err, results) { 
         resolve(results);
         mongoClient.close();
     });

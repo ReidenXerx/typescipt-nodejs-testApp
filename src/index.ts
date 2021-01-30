@@ -1,15 +1,14 @@
-import { get } from "http";
+import { ClientRequest, get, IncomingMessage, request } from "http";
 import { InterfacePlayer, InterfacePlayerSelector } from "./interfaces";
-import { importDocs } from "./routes";
+import { importDocs, insertDocs } from "./routes";
 import { requestImport, requestUpdate } from "./requests";
 import Route from "./server/Route";
 import Router from "./server/Router";
 
-export const PORT = 1337;
-
 const router: Router = new Router();
 router.startServer();
 router.addRoute(importDocs(router));
+router.addRoute(insertDocs(router));
 
 var stdin = process.openStdin();
 var stdinSecond = process.openStdin();
@@ -18,78 +17,64 @@ stdin.addListener("data", function(d) {
     switch(d.toString().trim()) {
         case 'insert': {
             stdinSecond.addListener('data', (object) => {
-                console.log(object.toString().trim());
+                const inputed = object.toString().trim();
+                let req: ClientRequest | null = null;
+                if(inputed) {
+                    req = request({
+                        hostname: requestImport.hostname,
+                        port: requestImport.port,
+                        path: '/insert',
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }, (res: IncomingMessage) => {
+                        let data = '';
+
+                        res.on('data', (responseChunk) => {
+                            data = `${data}${responseChunk.toString('utf8')}`;
+                            const object = JSON.parse(data);
+                        });
+
+                        res.on('end', () => {
+                            console.log('recieved data', data);
+                        });
+                    });
+                    req?.write(
+                        JSON.stringify(
+                            [
+                                {
+                                    name: 'Mihail',
+                                    secondName: 'Giant',
+                                    team: 'teamless',
+                                    birthday: new Date('10.05.1995'),
+                                    online: true,
+                                } as InterfacePlayer,
+                            ]
+                        )
+                    );
+                    req.end();
+                };
+
             });
+            break;
         };
         case 'import': {
             get({
                 hostname: requestImport.hostname,
                 port: requestImport.port,
                 path: requestImport.path,
-            }, async (res) => {
-                await res.on('data', (response) => {
+            },  (res) => {
+                 res.on('data', (response) => {
                     const data = JSON.parse(response);
                     console.log(`Got from server after import`);
                     console.log(data); 
                     console.log(`DB list:`);
                 });
             });
-        }
+            break;
+        };
     }
     console.log("you entered: [" + 
         d.toString().trim() + "]");
   });
-
-
-// router.addRoute(new Route(
-//     `/reload`,
-//     ({ player }: {player: string}) => {
-//         return dbSelect(JSON.parse(player) as InterfacePlayerSelector).then((playersCollection: Array<InterfacePlayerDocument>) => {
-//             router.playersDb = [];
-//             router.playersDb = playersCollection;
-//             return `Server successfully reloaded players collection from DB...`;
-//         });
-//     },
-// ));
-
-// ( () => {
-//         get({
-//             hostname: requestImport.hostname,
-//             port: requestImport.port,
-//             path: requestImport.path,
-//         }, async (res) => {
-//             await res.on('data', (response) => {
-//                 const data = JSON.parse(response);
-//                 console.log(`Got from server after import`);
-//                 console.log(data);
-                
-//             });            // get({
-//             //     hostname: requestUpdate.hostname,
-//             //     port: requestUpdate.port,
-//             //     path: requestUpdate.path,
-//             // }, async (res) => {
-//             //     await res.on('data', (response) => {
-//             //         const data = JSON.parse(response);
-//             //         console.log(`Got from server after insert`);
-//             //         console.log(data);
-                    
-//             //     })
-//             // })
-//         });
-//     })();
-
-
-// get({
-//     hostname: requestAdd.hostname,
-//     port: requestAdd.port,
-//     path: requestAdd.path,
-// }, async (res) => {
-//     await res.on('data', (response) => {
-//         const data = JSON.parse(response);
-//         console.log(`Got from server`);
-//         console.log(data);
-        
-//     })
-// });
-
-

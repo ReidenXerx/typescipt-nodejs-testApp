@@ -1,7 +1,8 @@
 import { format, parse } from "url";
+import { PORT } from "./classes/constants";
 import { InterfacePlayer, InterfacePlayerSelector } from "./interfaces";
+import { request, RequestOptions } from "http";
 
-import { PORT } from "./index";
 
 const requestAdd = parse(format({
     protocol: 'http',
@@ -18,6 +19,29 @@ const requestAdd = parse(format({
         } as InterfacePlayer)
     },
 }));
+
+const requestGET = (options: RequestOptions) => {
+    let output = '';
+
+    const req = request(options, (res) => {
+
+        res.on('data', (chunk) => {
+            output += chunk;
+        });
+
+        res.on('end', () => {
+            let obj = JSON.parse(output);
+            console.log(obj);
+            
+        });
+    });
+
+    req.on('error', (err) => {
+    // res.send('error: ' + err.message);
+    });
+
+    req.end();
+}
 
 const requestUpdate = parse(format({
     protocol: 'http',

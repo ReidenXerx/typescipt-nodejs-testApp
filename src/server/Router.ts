@@ -30,7 +30,7 @@ class Router {
             }
             if (urlObject?.pathname && query) {
                 new Promise((resolve, reject) => {//не нужен?
-                    //console.log("ROUTES START", this.routes, "ROUTES END")
+                    console.log("ROUTES START", this.routes, "ROUTES END")
                     console.log(urlObject?.pathname, "URL OBJECT")
                     this.routes.filter( (route: Route) => {
                         if (urlObject?.pathname === route.Path) {

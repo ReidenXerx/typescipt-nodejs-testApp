@@ -15,7 +15,7 @@ var stdin = process.openStdin();
 var stdinSecond = process.openStdin();
 
 stdin.addListener("data", function(d) { 
-    switch(d) {
+    switch(d.toString().trim()) {
         case 'insert': {
             stdinSecond.addListener('data', (object) => {
                 console.log(object.toString().trim());
@@ -52,31 +52,31 @@ stdin.addListener("data", function(d) {
 //     },
 // ));
 
-( () => {
-        get({
-            hostname: requestImport.hostname,
-            port: requestImport.port,
-            path: requestImport.path,
-        }, async (res) => {
-            await res.on('data', (response) => {
-                const data = JSON.parse(response);
-                console.log(`Got from server after import`);
-                console.log(data);
+// ( () => {
+//         get({
+//             hostname: requestImport.hostname,
+//             port: requestImport.port,
+//             path: requestImport.path,
+//         }, async (res) => {
+//             await res.on('data', (response) => {
+//                 const data = JSON.parse(response);
+//                 console.log(`Got from server after import`);
+//                 console.log(data);
                 
-            });            // get({
-            //     hostname: requestUpdate.hostname,
-            //     port: requestUpdate.port,
-            //     path: requestUpdate.path,
-            // }, async (res) => {
-            //     await res.on('data', (response) => {
-            //         const data = JSON.parse(response);
-            //         console.log(`Got from server after insert`);
-            //         console.log(data);
+//             });            // get({
+//             //     hostname: requestUpdate.hostname,
+//             //     port: requestUpdate.port,
+//             //     path: requestUpdate.path,
+//             // }, async (res) => {
+//             //     await res.on('data', (response) => {
+//             //         const data = JSON.parse(response);
+//             //         console.log(`Got from server after insert`);
+//             //         console.log(data);
                     
-            //     })
-            // })
-        });
-    })();
+//             //     })
+//             // })
+//         });
+//     })();
 
 
 // get({

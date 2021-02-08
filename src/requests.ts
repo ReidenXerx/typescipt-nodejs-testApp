@@ -29,12 +29,25 @@ const requestGET = (options: RequestOptions) => {
 
         res.on('end', () => {
             const obj = JSON.parse(output);
-            console.log(obj);
+            return obj;
         });
     });
 
-    req.on('error', (err) => {
-    // res.send('error: ' + err.message);
+    req.end();
+};
+
+const requestPOST = (options: RequestOptions) => {
+    let output = '';
+
+    const req = request(options, (res) => {
+        res.on('data', (chunk) => {
+            output += chunk;
+        });
+
+        res.on('end', () => {
+            const obj = JSON.parse(output);
+            return obj;
+        });
     });
 
     req.end();

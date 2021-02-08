@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
     ClientRequest, get, IncomingMessage, request,
 } from 'http';

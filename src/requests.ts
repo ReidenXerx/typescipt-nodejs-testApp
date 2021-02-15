@@ -1,7 +1,8 @@
-import { format, parse } from 'url';
+import { format, parse, UrlObject, UrlWithStringQuery } from 'url';
 import { request, RequestOptions } from 'http';
 import { PORT } from './classes/constants';
 import { InterfacePlayer, InterfacePlayerSelector } from './interfaces';
+import Player from './classes/Player';
 
 const requestAdd = parse(format({
     protocol: 'http',
@@ -19,38 +20,40 @@ const requestAdd = parse(format({
     },
 }));
 
-const requestGET = (options: RequestOptions) => {
-    let output = '';
+const requestGET = (options: RequestOptions, callback: Function) => {
+    let responsedData = '';
 
-    const req = request(options, (res) => {
+    return request(options, (res) => {
         res.on('data', (chunk) => {
-            output += chunk;
+            responsedData += chunk;
         });
 
         res.on('end', () => {
-            const obj = JSON.parse(output);
-            return obj;
+            callback(responsedData);
+            // const obj = JSON.parse(responsedData);
+            // return obj;
         });
     });
-
-    req.end();
 };
 
-const requestPOST = (options: RequestOptions) => {
-    let output = '';
+const requestPOST = (options: RequestOptions, callback: Function) => {
+    let responsedData = '';
 
-    const req = request(options, (res) => {
+    return request(options, (res) => {
         res.on('data', (chunk) => {
-            output += chunk;
+            responsedData += chunk;
         });
 
         res.on('end', () => {
-            const obj = JSON.parse(output);
-            return obj;
+            callback(responsedData);
+            // const obj = JSON.parse(responsedData);
+            // return obj;
         });
     });
 
-    req.end();
+    // req.write(sendingOjbect);
+
+    // req.end();
 };
 
 const requestUpdate = parse(format({
@@ -73,16 +76,37 @@ const requestUpdate = parse(format({
     },
 }));
 
-const requestImport = parse(format({
-    protocol: 'http',
-    hostname: 'localhost',
-    pathname: '/import',
-    port: PORT,
-    query: {
-        player: JSON.stringify(
-            {} as InterfacePlayerSelector,
-        ),
-    },
-}));
+const requestImportOPTIONS = (player: InterfacePlayerSelector) => {
+    const urlObject: UrlWithStringQuery = parse(format({
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/import',
+        port: PORT,
+        query: {
+            player: JSON.stringify(
+                player as InterfacePlayerSelector,
+            ),
+        },
+    }));
+    return {
+        hostname: 'localhost',
+        port: PORT,
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        path: urlObject.path,
+    };
+};
 
-export { requestAdd, requestImport, requestUpdate };
+const requestInsertOPTIONS: RequestOptions = {
+    hostname: 'localhost',
+    port: PORT,
+    path: '/insert',
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+};
+
+export { requestAdd, requestImportOPTIONS, requestInsertOPTIONS, requestUpdate, requestPOST, requestGET };

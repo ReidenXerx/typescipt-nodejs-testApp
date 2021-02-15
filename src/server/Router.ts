@@ -25,14 +25,14 @@ class Router {
     private server = createServer();
 
     private collectRequestData(request: IncomingMessage) {
-        return new Promise((resolve) => {
+        return new Promise<string>((resolve) => {
             let insertedData = '';
             request.on('data', (chunk) => {
                 response.writeHead(200);
-                insertedData += chunk;
+                insertedData += chunk.toString();
             });
             request.on('end', () => {
-                resolve(JSON.parse(insertedData));
+                resolve(insertedData);
             });
             
         })
@@ -40,43 +40,68 @@ class Router {
 
     public startServer() {
         this.server.on('request', (request, response) => {
-            console.log('req');
-            
             response.writeHead(200);
-            var data = '';
-            request.on('data', function(chunk: any) {
-                data += chunk.toString();
-            });
-            request.on('end', () => {
-                const { url } = request;
-                let urlObject: UrlWithParsedQuery | null = null;
+            const { url } = request;
+            let urlObject: UrlWithParsedQuery | null = null;
 
-                if (url) {
-                    urlObject = parse(url, true);
+            if (url) {
+                urlObject = parse(url, true);
+                if (urlObject && urlObject.query !== undefined) {
+                    console.log('triggered');
+                    
+                    this.collectRequestData(request).then((body: string) => {
+        
+                        if (urlObject?.pathname) {
+                            new Promise((resolve, reject) => {
+                                this.routes.filter((route: Route) => {
+                                    if (urlObject?.pathname === route.Path) {
+                                        resolve(route.engage(body));
+                                    }
+                                    return null;
+                                });
+                                reject(Error('no routes'));
+                            }).then((result) => {
+                                response.write(
+                                    JSON.stringify(result),
+                                );
+                                response.end();
+                            }).catch((e) => console.log(`Server failed handle route with path ${urlObject?.pathname}`, e));
+                        }
+                    })
                 }
+            }
+            // var data = '';
+            // request.on('data', function(chunk: any) {
+            //     data += chunk.toString();
+            // });
+            // request.on('end', () => {
+            //     const { url } = request;
+            //     let urlObject: UrlWithParsedQuery | null = null;
 
-                if (urlObject?.pathname) {
-                    new Promise((resolve, reject) => {
-                        this.routes.filter((route: Route) => {
-                            if (urlObject?.pathname === route.Path) {
-                                resolve(route.engage(data));
-                            }
-                            return null;
-                        });
-                        reject(Error('no routes'));
-                    }).then((result) => {
-                        response.write(
-                            JSON.stringify(result),
-                        );
-                        response.end();
-                    }).catch((e) => console.log(`Server failed handle route with path ${urlObject?.pathname}`, e));
-                }
-            });
+            //     if (url) {
+            //         urlObject = parse(url, true);
+            //     }
+
+            //     if (urlObject?.pathname) {
+            //         new Promise((resolve, reject) => {
+            //             this.routes.filter((route: Route) => {
+            //                 if (urlObject?.pathname === route.Path) {
+            //                     resolve(route.engage(data));
+            //                 }
+            //                 return null;
+            //             });
+            //             reject(Error('no routes'));
+            //         }).then((result) => {
+            //             response.write(
+            //                 JSON.stringify(result),
+            //             );
+            //             response.end();
+            //         }).catch((e) => console.log(`Server failed handle route with path ${urlObject?.pathname}`, e));
+            //     }
+            // });
         });
 
         this.server.on('request', (request, response) => {
-            console.log('req');
-            
             response.writeHead(200);
             const { url } = request;
             let urlObject: UrlWithParsedQuery | null = null;
@@ -84,14 +109,16 @@ class Router {
 
             if (url) {
                 urlObject = parse(url, true);
-                console.log('URLOBJECT', urlObject);
                 query = urlObject.query;
+                console.log('query', query);
+                
             }
-
-            if (urlObject?.pathname && query) {
+            
+            if (urlObject?.pathname && true /*(Object.getPrototypeOf(query) !== null)*/) {
                 new Promise((resolve, reject) => {
                     this.routes.filter((route: Route) => {
                         if (urlObject?.pathname === route.Path) {
+                            console.log("ENGAGE: ", route.engage(query)) // оно не работает во время import
                             resolve(route.engage(query));
                         }
                         return null;

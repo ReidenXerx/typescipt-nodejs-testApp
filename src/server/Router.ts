@@ -38,6 +38,12 @@ class Router {
         })
     }
 
+    //тела запроса нет только у гета, а также может не быть у делита
+    //реквест он дата возвращает тело запроса, в случае делита мы вытягиваем данные из юрл
+    //get, pose, put, delete, patch
+    // интеграция многопоточности
+    // NODE_ENV переменная окружения, с помощью нее передавать порт, хостнейп и протокол, и пр. Прописывается в package.json
+    // общий интерфейс для чего-нибудь
     public startServer() {
         this.server.on('request', (request, response) => {
             response.writeHead(200);
@@ -105,7 +111,7 @@ class Router {
             response.writeHead(200);
             const { url } = request;
             let urlObject: UrlWithParsedQuery | null = null;
-            let query: ParsedUrlQuery | null = null;
+            let query: ParsedUrlQuery | string = ''; // TODO стрингификация
 
             if (url) {
                 urlObject = parse(url, true);
@@ -114,7 +120,7 @@ class Router {
                 
             }
             
-            if (urlObject?.pathname && true /*(Object.getPrototypeOf(query) !== null)*/) {
+            if (urlObject?.pathname /*(Object.getPrototypeOf(query) !== null)*/) {
                 new Promise((resolve, reject) => {
                     this.routes.filter((route: Route) => {
                         if (urlObject?.pathname === route.Path) {
@@ -197,6 +203,11 @@ class Router {
         //     }
         // }).listen(this.port, () => {
         //     console.log(`Server listen on the port ${this.port}`);
+            // const event = new CustomEvent('build', { url: 'test.com' });
+            // document.addEventListener('build', (e) => {
+            //     console.log(e.detail);
+            // });
+            // document.dispatchEvent(event);
         // });
     }
 }

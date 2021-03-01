@@ -89,7 +89,6 @@ stdin.addListener('data', (d) => {
                 //const data = JSON.parse(response);
                     console.log('Got from server after import');
                     console.log(response);
-                    console.log('DB list:');
             });
             req.end();
             // get({

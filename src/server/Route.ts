@@ -1,9 +1,10 @@
+import { TransferDataWrapper } from '../interfaces';
 import Middleware from './Middleware';
 
 class Route {
     constructor(
         private path: string,
-        private callback: Function,
+        private callback: (objectData: TransferDataWrapper) => Promise<any>,
         private middleware?: Middleware,
 
     ) {}
@@ -16,7 +17,7 @@ class Route {
         return this.callback;
     }
 
-    public engage(objectData: Object | null) {
+    public engage(objectData: TransferDataWrapper) {
         if (this.middleware) {
             return this.callback(
                 this.middleware.run(objectData),

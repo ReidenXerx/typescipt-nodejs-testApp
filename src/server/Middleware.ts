@@ -1,4 +1,6 @@
-class Middleware<T = Object | null> {// задокумментировать
+import { TransferDataWrapper } from "../interfaces";
+
+class Middleware {// задокумментировать
     constructor(
         private chainHandlers: Array<Function> = [],
     ) {}
@@ -7,14 +9,14 @@ class Middleware<T = Object | null> {// задокумментировать
         this.chainHandlers.push(handler);
     }
 
-    private executeMiddleware(objectData: T) {
-        this.chainHandlers.reduce(
+    private executeMiddleware(objectData: TransferDataWrapper): TransferDataWrapper {
+        return this.chainHandlers.reduce(
             (previousReturned, currentHandler) => currentHandler(previousReturned),
             objectData,
         );
     }
 
-    public run(objectData: T) {
+    public run(objectData: TransferDataWrapper): TransferDataWrapper {
         return this.executeMiddleware(objectData);
     }
 }

@@ -15,3 +15,9 @@ export interface InterfacePlayerSelector {
     birthday?: Date,
     online?: Boolean,
 }
+
+export interface TransferDataWrapper {
+    [customField: string]: any,
+    objectData: string,
+    statusText: string,
+}

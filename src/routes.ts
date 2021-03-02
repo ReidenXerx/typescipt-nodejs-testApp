@@ -8,7 +8,6 @@ const importDocs = (router: Router) => new Route(
     '/import',
     ({ objectData: filterPlayer } : TransferDataWrapper) => new Promise((resolve, reject) => {
         if (filterPlayer) {
-            //let bullshit = JSON.parse("{'nigger': 'niggerskii'}" as any); 
             console.log('import processing...');
             dbSelect(/*JSON.parse(filterPlayer) as InterfacePlayerSelector*/{}).then((playersCollection: Array<InterfacePlayer>) => {
                 router.playersDb = playersCollection;

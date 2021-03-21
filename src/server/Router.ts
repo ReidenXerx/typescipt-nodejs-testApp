@@ -67,6 +67,7 @@ class Router {
                                             statusText: '',
                                         } as TransferDataWrapper,
                                     ).then((resultFromRoute: TransferDataWrapper) => {
+                                        route.lastRequestDataSetter = resultFromRoute.lastRequestData;
                                         response.write(
                                             JSON.stringify(resultFromRoute),
                                         );

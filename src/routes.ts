@@ -1,3 +1,4 @@
+/* eslint-disable prefer-promise-reject-errors */
 /* eslint-disable no-console */
 import Router from './server/Router';
 import { dbInsert, dbSelect } from './connectorDb';
@@ -6,54 +7,73 @@ import Route from './server/Route';
 
 const importDocs = (router: Router) => new Route(
     '/import',
-    ({ objectData: filterPlayer } : TransferDataWrapper) => new Promise((resolve, reject) => {
+    ({ objectData: filterPlayer } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
         if (filterPlayer) {
             console.log('import processing...');
-            dbSelect(/*JSON.parse(filterPlayer) as InterfacePlayerSelector*/{}).then((playersCollection: Array<InterfacePlayer>) => {
-                router.playersDb = playersCollection;
-                console.log('db select passed', playersCollection); // сюда не заходит
-                resolve(
-                    {
-                        objectData: '',
-                        statusText: 'Server successfully import players collection from DB...',
-                    } as TransferDataWrapper,
-                );
-            }).catch((error) => {
-                console.log(error, 'error');
-                // eslint-disable-next-line prefer-promise-reject-errors
+            if (filterPlayer !== lastRequestData) {
+                dbSelect(/*JSON.parse(filterPlayer) as InterfacePlayerSelector*/{}).then((playersCollection: Array<InterfacePlayer>) => {
+                    router.playersDb = playersCollection;
+                    console.log('db select passed', playersCollection); // сюда не заходит
+                    resolve(
+                        {
+                            objectData: '',
+                            statusText: 'Server successfully import players collection from DB...',
+                        } as TransferDataWrapper,
+                    );
+                }).catch((error) => {
+                    console.log(error, 'error');
+                    reject(
+                        {
+                            objectData: '',
+                            statusText: error.message,
+                            lastRequestData: filterPlayer,
+                        } as TransferDataWrapper,
+                    );
+                });
+            } else {
                 reject(
                     {
                         objectData: '',
-                        statusText: error.message,
+                        statusText: 'Duplicate request. Goodbye. Cancelling...',
                     } as TransferDataWrapper,
                 );
-            });
+            }
         }
     }),
 );
 
 const insertDocs = (router: Router) => new Route(
     '/insert',
-    ({ objectData: arrayForInsert } : TransferDataWrapper) => new Promise((resolve, reject) => {
-        let playersArray = [];
-        playersArray = JSON.parse(arrayForInsert);
-        dbInsert(playersArray as Array<InterfacePlayer>).then((playerInserted) => {
-            router.playersDb.push(playerInserted as InterfacePlayer);
-            resolve(
-                {
-                    objectData: '',
-                    statusText: 'Server successfully created player and flash it in the DB...',
-                } as TransferDataWrapper,
-            );
-        }).catch((error: Error) => {
-            // eslint-disable-next-line prefer-promise-reject-errors
+    ({ objectData: arrayForInsert } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
+        if (arrayForInsert !== lastRequestData) {
+            let playersArray = [];
+            playersArray = JSON.parse(arrayForInsert);
+            dbInsert(playersArray as Array<InterfacePlayer>).then((playerInserted) => {
+                router.playersDb.push(playerInserted as InterfacePlayer);
+                resolve(
+                    {
+                        objectData: '',
+                        statusText: 'Server successfully created player and flash it in the DB...',
+                    } as TransferDataWrapper,
+                );
+            }).catch((error: Error) => {
+                // eslint-disable-next-line prefer-promise-reject-errors
+                reject(
+                    {
+                        objectData: '',
+                        statusText: error.message,
+                        lastRequestData: arrayForInsert,
+                    } as TransferDataWrapper,
+                );
+            });
+        } else {
             reject(
                 {
                     objectData: '',
-                    statusText: error.message,
+                    statusText: 'Duplicate request. Goodbye. Cancelling...',
                 } as TransferDataWrapper,
             );
-        });
+        }
     }),
 );
 

@@ -21,3 +21,8 @@ export interface TransferDataWrapper {
     objectData: string,
     statusText: string,
 }
+
+export interface BatchSubRequest {
+    path: string,
+    payload: string,
+}

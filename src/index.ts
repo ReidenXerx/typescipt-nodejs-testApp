@@ -4,5 +4,5 @@ import Router from './server/Router';
 
 const router: Router = new Router();
 router.startServer();
-router.addRoute(importDocs(router));
-router.addRoute(insertDocs(router));
+router.addRoute(importDocs());
+router.addRoute(insertDocs());

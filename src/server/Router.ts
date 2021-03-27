@@ -1,18 +1,13 @@
 /* eslint-disable */
-import { request, response } from 'express';
 import { createServer, IncomingMessage } from 'http';
 import { parse, UrlWithParsedQuery } from 'url';
 import { ParsedUrlQuery } from 'querystring';
 
 import Route from './Route';
-import PlayersHandler from '../classes/PlayersHandler';
-import { InterfacePlayer, TransferDataWrapper } from '../interfaces';
+import { TransferDataWrapper } from '../interfaces';
 import { PORT } from '../classes/constants';
 
 class Router {
-    public playersHandler: PlayersHandler = new PlayersHandler();
-
-    public playersDb: Array<InterfacePlayer> = [];
 
     private routes: Array<Route> = [];
 
@@ -28,7 +23,6 @@ class Router {
         return new Promise<string>((resolve) => {
             let insertedData = '';
             request.on('data', (chunk) => {
-                response.writeHead(200);
                 insertedData += chunk.toString();
             });
             request.on('end', () => {
@@ -44,10 +38,10 @@ class Router {
     // интеграция многопоточности
     // NODE_ENV переменная окружения, с помощью нее передавать порт, хостнейп и протокол, и пр. Прописывается в package.json
     // + общий интерфейс для чего-нибудь
-    // проблема с случайным повторением записей
+    // + проблема с случайным повторением записей
     public startServer() {
         this.server.on('request', (request, response) => {
-            response.writeHead(200);
+            // response.writeHead(200);
             const { url } = request;
             let urlObject: UrlWithParsedQuery | null = null;
             let query: ParsedUrlQuery | string = ''; 
@@ -56,7 +50,6 @@ class Router {
                 urlObject = parse(url, true);
                 query = urlObject.query ? urlObject.query : '';
                 if (urlObject && !query) {
-                    console.log('POST handler');
                     this.collectRequestData(request).then((body: string) => {
                         if (urlObject?.pathname) {
                             this.routes.filter((route: Route) => {
@@ -88,21 +81,17 @@ class Router {
         });
 
         this.server.on('request', (request, response) => {
-            response.writeHead(200);
             const { url } = request;
             let urlObject: UrlWithParsedQuery | null = null;
-            let query: ParsedUrlQuery | string = ''; // TODO стрингификация
+            let query: ParsedUrlQuery | string = '';
 
             if (url) {
                 urlObject = parse(url, true);
                 query = urlObject.query;
                 if(urlObject && query) {
-                    console.log('GET handler');
                     if (urlObject?.pathname) {
-                        console.log("urlObject if passed", urlObject.pathname)
                         this.routes.forEach((route: Route) => {
                             if (urlObject?.pathname === route.Path) {
-                                console.log("path")
                                 route.engage(
                                     {
                                         objectData: query,

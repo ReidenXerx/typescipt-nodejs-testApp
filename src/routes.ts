@@ -2,30 +2,28 @@
 /* eslint-disable no-console */
 import Router from './server/Router';
 import { dbInsert, dbSelect } from './connectorDb';
-import { InterfacePlayerSelector, InterfacePlayer, TransferDataWrapper } from './interfaces';
+import { InterfacePlayerSelector, InterfacePlayer, TransferDataWrapper, BatchSubRequest } from './interfaces';
 import Route from './server/Route';
+import RouteBatch from './classes/RouteBatch';
 
-const importDocs = (router: Router) => new Route(
+const importDocs = () => new Route(
     '/import',
     ({ objectData: filterPlayer } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
         if (filterPlayer) {
             console.log('import processing...');
             if (filterPlayer !== lastRequestData) {
                 dbSelect(/*JSON.parse(filterPlayer) as InterfacePlayerSelector*/{}).then((playersCollection: Array<InterfacePlayer>) => {
-                    router.playersDb = playersCollection;
-                    console.log('db select passed', playersCollection); // сюда не заходит
                     resolve(
                         {
-                            objectData: '',
+                            objectData: JSON.stringify(playersCollection),
                             statusText: 'Server successfully import players collection from DB...',
                         } as TransferDataWrapper,
                     );
                 }).catch((error) => {
-                    console.log(error, 'error');
                     reject(
                         {
-                            objectData: '',
-                            statusText: error.message,
+                            objectData: JSON.stringify(error),
+                            statusText: 'Sorry, something went wrong',
                             lastRequestData: filterPlayer,
                         } as TransferDataWrapper,
                     );
@@ -42,14 +40,13 @@ const importDocs = (router: Router) => new Route(
     }),
 );
 
-const insertDocs = (router: Router) => new Route(
+const insertDocs = () => new Route(
     '/insert',
     ({ objectData: arrayForInsert } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
         if (arrayForInsert !== lastRequestData) {
             let playersArray = [];
             playersArray = JSON.parse(arrayForInsert);
             dbInsert(playersArray as Array<InterfacePlayer>).then((playerInserted) => {
-                router.playersDb.push(playerInserted as InterfacePlayer);
                 resolve(
                     {
                         objectData: '',
@@ -75,6 +72,51 @@ const insertDocs = (router: Router) => new Route(
             );
         }
     }),
+);
+
+const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
+    '/batch',
+    ({ objectData: stringBatchSubRequests } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
+        if (stringBatchSubRequests !== lastRequestData) {
+            let arrayBatchSubRequests: Array<BatchSubRequest> = [];
+            arrayBatchSubRequests = JSON.parse(stringBatchSubRequests);
+            const batchSubRequestQueue: Array<Promise<any>> = [];
+            const batchSubRequestQueueNames: Array<string> = [];
+            const batchSubRequestQueueResults: Array<TransferDataWrapper> = [];
+            arrayBatchSubRequests.forEach((batchSubRequest: BatchSubRequest) => {
+                restrictedRoutes.forEach((restrictedRoute: Route) => {
+                    if (restrictedRoute.Path === batchSubRequest.path) {
+                        batchSubRequestQueue.push(restrictedRoute.engage(
+                            {
+                                objectData: batchSubRequest.payload,
+                                statusText: '',
+                            } as TransferDataWrapper,
+                        ));
+                        batchSubRequestQueueNames.push(batchSubRequest.path);
+                    }
+                });
+            });
+
+            Promise.all(batchSubRequestQueue).then((results) => {
+                batchSubRequestQueueResults.concat(results);
+            });
+
+            resolve(
+                {
+                    objectData: batchSubRequestQueueResults.join(),
+                    statusText: 'Server successfully completed batch request',
+                } as TransferDataWrapper,
+            )
+        } else {
+            reject(
+                {
+                    objectData: '',
+                    statusText: 'Duplicate request. Goodbye. Cancelling...',
+                } as TransferDataWrapper,
+            );
+        }
+    }),
+    restrictedRoutes,
 );
 
 export { importDocs, insertDocs };

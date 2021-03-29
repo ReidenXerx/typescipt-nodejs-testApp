@@ -119,4 +119,4 @@ const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
     restrictedRoutes,
 );
 
-export { importDocs, insertDocs };
+export { importDocs, insertDocs, batchRequest };

@@ -17,6 +17,10 @@ class Router {
         this.routes.push(newRoute);
     }
 
+    get Routes() {
+        return this.routes;
+    }
+
     private server = createServer();
 
     private collectRequestData(request: IncomingMessage) {

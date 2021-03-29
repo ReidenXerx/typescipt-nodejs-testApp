@@ -77,6 +77,7 @@ const insertDocs = () => new Route(
 const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
     '/batch',
     ({ objectData: stringBatchSubRequests } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
+        // добавить проверку саб запросам на то, есть ли у них payload, чтоб если его нет, парсить path и определять, что это гет
         if (stringBatchSubRequests !== lastRequestData) {
             let arrayBatchSubRequests: Array<BatchSubRequest> = [];
             arrayBatchSubRequests = JSON.parse(stringBatchSubRequests);
@@ -97,7 +98,8 @@ const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
                 });
             });
 
-            Promise.all(batchSubRequestQueue).then((results) => {
+            Promise.allSettled(batchSubRequestQueue).then((results) => {
+                // в чем отличие [...a] от concat
                 batchSubRequestQueueResults.concat(results);
             });
 

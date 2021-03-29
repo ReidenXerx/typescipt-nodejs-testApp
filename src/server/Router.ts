@@ -43,9 +43,10 @@ class Router {
     // NODE_ENV переменная окружения, с помощью нее передавать порт, хостнейп и протокол, и пр. Прописывается в package.json
     // + общий интерфейс для чего-нибудь
     // + проблема с случайным повторением записей
+    // тестирование mocha + chai + typescript types + штука для низкоуровневого тестирования моделей на сервере для монги
+    // почитать как развернуть на удаленном сервере (NginX)
     public startServer() {
         this.server.on('request', (request, response) => {
-            // response.writeHead(200);
             const { url } = request;
             let urlObject: UrlWithParsedQuery | null = null;
             let query: ParsedUrlQuery | string = ''; 

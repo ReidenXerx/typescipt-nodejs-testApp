@@ -52,7 +52,7 @@ class Router {
 
             if (url) {
                 urlObject = parse(url, true);
-                query = urlObject.query ? urlObject.query : '';
+                query = urlObject.query;
                 if (urlObject && JSON.stringify(query) == '{}') {
                     
                     this.collectRequestData(request).then((body: string) => {
@@ -96,31 +96,33 @@ class Router {
                 urlObject = parse(url, true);
                 query = urlObject.query;
                 
-                if(urlObject && JSON.stringify(query) !== '{}') {
-
-                    if (urlObject?.pathname) {
-                        this.routes.forEach((route: Route) => {
-                            if (urlObject?.pathname === route.Path) {
-                                route.engage(
-                                    {
-                                        objectData: JSON.stringify(query),
-                                        statusText: '',
-                                    } as TransferDataWrapper,
-                                ).then((resultFromRoute: TransferDataWrapper) => {
-                                    response.write(
-                                        JSON.stringify(resultFromRoute),
-                                    );
-                                    response.end();
-                                }).catch((errorFromRoute: TransferDataWrapper) => {
-                                    response.write(
-                                        JSON.stringify(errorFromRoute),
-                                    );
-                                    response.end();
-                                });
-                            }
-                            return null;
-                        });
-                    }
+                console.log('triggered', query);
+                if(urlObject.pathname) {
+                    this.collectRequestData(request).then((body: string) => {
+                        if (body == '') {
+                            this.routes.forEach((route: Route) => {
+                                if (urlObject?.pathname === route.Path) {
+                                    route.engage(
+                                        {
+                                            objectData: JSON.stringify(query),
+                                            statusText: '',
+                                        } as TransferDataWrapper,
+                                    ).then((resultFromRoute: TransferDataWrapper) => {
+                                        response.write(
+                                            JSON.stringify(resultFromRoute),
+                                        );
+                                        response.end();
+                                    }).catch((errorFromRoute: TransferDataWrapper) => {
+                                        response.write(
+                                            JSON.stringify(errorFromRoute),
+                                        );
+                                        response.end();
+                                    });
+                                }
+                                return null;
+                            });
+                        }
+                    });
                 }
             }
         });

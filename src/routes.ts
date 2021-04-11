@@ -1,18 +1,21 @@
-/* eslint-disable prefer-promise-reject-errors */
+
 /* eslint-disable no-console */
 import Router from './server/Router';
 import { dbInsert, dbSelect } from './connectorDb';
-import { InterfacePlayerSelector, InterfacePlayer, TransferDataWrapper, BatchSubRequest } from './interfaces';
+import { InterfacePlayerSelector, InterfacePlayer, TransferDataWrapper, BatchSubRequest, batchSubRequestResult, batchSubRequestQueueTask } from './interfaces';
 import Route from './server/Route';
 import RouteBatch from './classes/RouteBatch';
+import { parse } from 'url';
 
 const importDocs = () => new Route(
     '/import',
     ({ objectData: filterPlayer } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
         if (filterPlayer) {
             console.log('import processing...');
+            
             if (filterPlayer !== lastRequestData) {
-                dbSelect(/*JSON.parse(filterPlayer) as InterfacePlayerSelector*/{}).then((playersCollection: Array<InterfacePlayer>) => {
+                dbSelect(JSON.parse(filterPlayer) as InterfacePlayerSelector).then((playersCollection: Array<InterfacePlayer>) => {
+                    
                     resolve(
                         {
                             objectData: JSON.stringify(playersCollection),
@@ -77,38 +80,77 @@ const insertDocs = () => new Route(
 const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
     '/batch',
     ({ objectData: stringBatchSubRequests } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
-        // добавить проверку саб запросам на то, есть ли у них payload, чтоб если его нет, парсить path и определять, что это гет
+        // +добавить проверку саб запросам на то, есть ли у них payload, чтоб если его нет, парсить path и определять, что это гет
+        
         if (stringBatchSubRequests !== lastRequestData) {
+
             let arrayBatchSubRequests: Array<BatchSubRequest> = [];
-            arrayBatchSubRequests = JSON.parse(stringBatchSubRequests);
-            const batchSubRequestQueue: Array<Promise<any>> = [];
-            const batchSubRequestQueueNames: Array<string> = [];
-            const batchSubRequestQueueResults: Array<TransferDataWrapper> = [];
+            const batchSubRequestQueue: Array<batchSubRequestQueueTask> = [];
+            const batchSubRequestQueueResults: Array<batchSubRequestResult> = [];
+
+            console.log('stringBatchSubRequests', stringBatchSubRequests);
+            try {
+                arrayBatchSubRequests = JSON.parse(stringBatchSubRequests);
+            } catch (error) {
+                console.log(error);
+                
+            }
+            console.log('arrayBatchSubRequests', arrayBatchSubRequests);
+
             arrayBatchSubRequests.forEach((batchSubRequest: BatchSubRequest) => {
+                console.log('batchSubRequest', batchSubRequest);
+                
+                // convert from get request
+                if (!batchSubRequest.payload) {
+                    batchSubRequest.payload = JSON.stringify(parse(batchSubRequest.path, true).query);
+                    batchSubRequest.path = parse(batchSubRequest.path, true).pathname!;
+                }
+                
                 restrictedRoutes.forEach((restrictedRoute: Route) => {
+                    
                     if (restrictedRoute.Path === batchSubRequest.path) {
-                        batchSubRequestQueue.push(restrictedRoute.engage(
+                        batchSubRequestQueue.push(
                             {
-                                objectData: batchSubRequest.payload,
-                                statusText: '',
-                            } as TransferDataWrapper,
-                        ));
-                        batchSubRequestQueueNames.push(batchSubRequest.path);
+                                pathName: batchSubRequest.path,
+                                task: restrictedRoute.engage(
+                                {
+                                    objectData: batchSubRequest.payload,
+                                    statusText: '',
+                                } as TransferDataWrapper)
+                            }
+                        );
                     }
                 });
             });
 
-            Promise.allSettled(batchSubRequestQueue).then((results) => {
-                // в чем отличие [...a] от concat
-                batchSubRequestQueueResults.concat(results);
+            // порядок после allSettled сохраняетс?
+            Promise.allSettled(batchSubRequestQueue.map((batchSubRequest) => {
+                return batchSubRequest.task;
+            })).then((results) => {
+                // + в чем отличие [...a] от concat
+                console.log('results', results);
+                
+                results.forEach((batchSubRequestResult, index) => {
+                    if (batchSubRequestResult.status === 'fulfilled') {
+                        
+                        batchSubRequestQueueResults.push(
+                            {
+                                pathName: batchSubRequestQueue[index].pathName,
+                                statusText: 'Congratulations, your request was succeed',
+                                result: JSON.stringify(batchSubRequestResult.value),
+                            } as batchSubRequestResult
+                        )
+                    }
+                });
+                
+                resolve(
+                    {
+                        objectData: JSON.stringify(batchSubRequestQueueResults),
+                        statusText: 'Server successfully completed batch request',
+                    } as TransferDataWrapper,
+                )
             });
-
-            resolve(
-                {
-                    objectData: batchSubRequestQueueResults.join(),
-                    statusText: 'Server successfully completed batch request',
-                } as TransferDataWrapper,
-            )
+            
         } else {
             reject(
                 {

@@ -26,3 +26,15 @@ export interface BatchSubRequest {
     path: string,
     payload: string,
 }
+
+export interface batchSubRequestResult {
+    pathName: string, // using like name
+    statusText: string,
+    result?: string,
+    reason?: string,
+}
+
+export interface batchSubRequestQueueTask {
+    pathName: string,
+    task: Promise<any>,
+}

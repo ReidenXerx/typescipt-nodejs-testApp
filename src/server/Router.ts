@@ -5,13 +5,12 @@ import { ParsedUrlQuery } from 'querystring';
 
 import Route from './Route';
 import { TransferDataWrapper } from '../interfaces';
-import { PORT } from '../classes/constants';
 
 class Router {
 
     private routes: Array<Route> = [];
 
-    private port: number = PORT;
+    private port: number = parseInt(process.env.PORT || '1337');
 
     public addRoute(newRoute: Route) {
         this.routes.push(newRoute);
@@ -40,7 +39,7 @@ class Router {
     // + реквест он дата возвращает тело запроса, в случае делита мы вытягиваем данные из юрл
     // + get, pose, put, delete, patch
     // интеграция многопоточности
-    // NODE_ENV переменная окружения, с помощью нее передавать порт, хостнейп и протокол, и пр. Прописывается в package.json
+    // + NODE_ENV переменная окружения, с помощью нее передавать порт, хостнейп и протокол, и пр. Прописывается в package.json
     // + общий интерфейс для чего-нибудь
     // + проблема с случайным повторением записей
     // тестирование mocha + chai + typescript types + штука для низкоуровневого тестирования моделей на сервере для монги
@@ -54,9 +53,12 @@ class Router {
             if (url) {
                 urlObject = parse(url, true);
                 query = urlObject.query ? urlObject.query : '';
-                if (urlObject && !query) {
+                if (urlObject && JSON.stringify(query) == '{}') {
+                    
                     this.collectRequestData(request).then((body: string) => {
+                        
                         if (urlObject?.pathname) {
+                        
                             this.routes.filter((route: Route) => {
                                 if (urlObject?.pathname === route.Path) {
                                     route.engage(
@@ -93,13 +95,15 @@ class Router {
             if (url) {
                 urlObject = parse(url, true);
                 query = urlObject.query;
-                if(urlObject && query) {
+                
+                if(urlObject && JSON.stringify(query) !== '{}') {
+
                     if (urlObject?.pathname) {
                         this.routes.forEach((route: Route) => {
                             if (urlObject?.pathname === route.Path) {
                                 route.engage(
                                     {
-                                        objectData: query,
+                                        objectData: JSON.stringify(query),
                                         statusText: '',
                                     } as TransferDataWrapper,
                                 ).then((resultFromRoute: TransferDataWrapper) => {

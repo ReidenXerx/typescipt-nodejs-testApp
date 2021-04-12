@@ -53,11 +53,11 @@ class Router {
             if (url) {
                 urlObject = parse(url, true);
                 query = urlObject.query;
-                if (urlObject && JSON.stringify(query) == '{}') {
+                if (urlObject?.pathname) {
                     
                     this.collectRequestData(request).then((body: string) => {
                         
-                        if (urlObject?.pathname) {
+                        if (body) {
                         
                             this.routes.filter((route: Route) => {
                                 if (urlObject?.pathname === route.Path) {
@@ -99,7 +99,7 @@ class Router {
                 console.log('triggered', query);
                 if(urlObject.pathname) {
                     this.collectRequestData(request).then((body: string) => {
-                        if (body == '') {
+                        if (!body) {
                             this.routes.forEach((route: Route) => {
                                 if (urlObject?.pathname === route.Path) {
                                     route.engage(

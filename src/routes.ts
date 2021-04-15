@@ -141,6 +141,7 @@ const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
                             } as batchSubRequestResult
                         )
                     }
+                    // add else with errors
                 });
                 
                 resolve(

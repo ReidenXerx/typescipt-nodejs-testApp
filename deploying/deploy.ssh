@@ -16,4 +16,5 @@ git clone --branch mongo-standard https://github.com/ReidenXerx/typescipt-nodejs
 cd typescipt-nodejs-testApp/
 npm i
 sudo cp deploying/nginxResources/default /etc/nginx/sites-available
+sudo cp deploying/nginxResources/nginx.conf /etc/nginx/
 sudo service nginx restart

@@ -80,7 +80,6 @@ const insertDocs = () => new Route(
 const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
     '/batch',
     ({ objectData: stringBatchSubRequests } : TransferDataWrapper, lastRequestData: string) => new Promise((resolve, reject) => {
-        // +добавить проверку саб запросам на то, есть ли у них payload, чтоб если его нет, парсить path и определять, что это гет
         
         if (stringBatchSubRequests !== lastRequestData) {
 
@@ -123,13 +122,9 @@ const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
                 });
             });
 
-            // порядок после allSettled сохраняетс?
             Promise.allSettled(batchSubRequestQueue.map((batchSubRequest) => {
                 return batchSubRequest.task;
             })).then((results) => {
-                // + в чем отличие [...a] от concat
-                console.log('results', results);
-                
                 results.forEach((batchSubRequestResult, index) => {
                     if (batchSubRequestResult.status === 'fulfilled') {
                         
@@ -138,6 +133,14 @@ const batchRequest = (restrictedRoutes: Array<Route>) => new RouteBatch(
                                 pathName: batchSubRequestQueue[index].pathName,
                                 statusText: 'Congratulations, your request was succeed',
                                 result: JSON.stringify(batchSubRequestResult.value),
+                            } as batchSubRequestResult
+                        )
+                    } else { // rejected
+                        batchSubRequestQueueResults.push(
+                            {
+                                pathName: batchSubRequestQueue[index].pathName,
+                                statusText: 'Your request rejected',
+                                reason: JSON.stringify(batchSubRequestResult.reason),
                             } as batchSubRequestResult
                         )
                     }

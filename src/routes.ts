@@ -1,11 +1,18 @@
 
 /* eslint-disable no-console */
-import Router from './server/Router';
+/*eslint-disable */
+import { parse } from 'url';
 import { dbInsert, dbSelect } from './connectorDb';
-import { InterfacePlayerSelector, InterfacePlayer, TransferDataWrapper, BatchSubRequest, batchSubRequestResult, batchSubRequestQueueTask } from './interfaces';
+import {
+    InterfacePlayerSelector,
+    InterfacePlayer,
+    TransferDataWrapper,
+    BatchSubRequest,
+    batchSubRequestResult,
+    batchSubRequestQueueTask,
+} from './interfaces';
 import Route from './server/Route';
 import RouteBatch from './classes/RouteBatch';
-import { parse } from 'url';
 
 const importDocs = () => new Route(
     '/import',
@@ -67,6 +74,7 @@ const insertDocs = () => new Route(
                 );
             });
         } else {
+            // eslint-disable-next-line prefer-promise-reject-errors
             reject(
                 {
                     objectData: '',

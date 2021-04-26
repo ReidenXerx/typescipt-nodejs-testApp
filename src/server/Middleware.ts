@@ -1,6 +1,6 @@
-import { TransferDataWrapper } from "../interfaces";
+import { TransferDataWrapper } from '../interfaces';
 
-class Middleware {// задокумментировать
+class Middleware {
     constructor(
         private chainHandlers: Array<Function> = [],
     ) {}

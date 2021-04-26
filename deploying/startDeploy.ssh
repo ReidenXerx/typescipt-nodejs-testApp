@@ -1,4 +1,4 @@
-chmod 400 /keys/aws-mentoringProject-keys.pem
-add-ssh ./keys/aws-mentoringProject-keys.pem
+chmod 400 ./keys/aws-mentoringProject-keys.pem
+ssh-add ./keys/aws-mentoringProject-keys.pem
 ssh ubuntu@ec2-54-228-138-91.eu-west-1.compute.amazonaws.com -yes
 

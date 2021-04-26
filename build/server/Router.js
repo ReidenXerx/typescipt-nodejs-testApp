@@ -43,11 +43,11 @@ class Router {
             if (url) {
                 urlObject = url_1.parse(url, true);
                 query = urlObject.query;
-                if (urlObject?.pathname) {
+                if (urlObject === null || urlObject === void 0 ? void 0 : urlObject.pathname) {
                     this.collectRequestData(request).then((body) => {
                         if (body) {
                             this.routes.filter((route) => {
-                                if (urlObject?.pathname === route.Path) {
+                                if ((urlObject === null || urlObject === void 0 ? void 0 : urlObject.pathname) === route.Path) {
                                     route.engage({
                                         objectData: body,
                                         statusText: '',
@@ -79,7 +79,7 @@ class Router {
                     this.collectRequestData(request).then((body) => {
                         if (!body) {
                             this.routes.forEach((route) => {
-                                if (urlObject?.pathname === route.Path) {
+                                if ((urlObject === null || urlObject === void 0 ? void 0 : urlObject.pathname) === route.Path) {
                                     route.engage({
                                         objectData: JSON.stringify(query),
                                         statusText: '',

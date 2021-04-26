@@ -12,9 +12,15 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo systemctl start mongod
+sudo rm -r typescript-nodejs-testApp/
 git clone --branch mongo-standard https://github.com/ReidenXerx/typescipt-nodejs-testApp.git
 cd typescipt-nodejs-testApp/
 npm i
 sudo cp deploying/nginxResources/default /etc/nginx/sites-available
 sudo cp deploying/nginxResources/nginx.conf /etc/nginx/
 sudo service nginx restart
+sudo systemctl start mongod
+npm run build
+cd build
+node index.js NODE_ENV PORT=1337
+

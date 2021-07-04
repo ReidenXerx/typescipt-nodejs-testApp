@@ -1,0 +1,38 @@
+FROM ubuntu:20.04
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+
+RUN apt-get update
+
+RUN apt install nodejs -y
+
+RUN apt install npm -y
+
+RUN npm install
+# If you are building your code for production
+# RUN npm ci --only=production
+
+RUN pwd
+
+RUN ls
+
+# Bundle app source
+COPY . .
+
+RUN ls build
+
+RUN npm run build
+
+ENV PORT 1338
+
+EXPOSE 1338/tcp
+
+EXPOSE 1338/udp
+
+# CMD [ "node", "/usr/src/app/build/index.js" ]

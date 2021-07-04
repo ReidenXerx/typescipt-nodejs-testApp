@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dbUpdate = exports.dbInsert = exports.dbSelect = void 0;
 const mongodb_1 = require("mongodb");
-const url = 'mongodb://localhost:27017/FOOTBALL_PLAYERS';
+// const url = `mongodb://localhost:27017/FOOTBALL_PLAYERS`;
+const url = `mongodb://${process.env.MONGO}/FOOTBALL_PLAYERS`;
 const mongoClient = new mongodb_1.MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -14,6 +15,7 @@ const dbSelect = (player = {}) => new Promise((resolve, reject) => {
     const db = mongoClient.db('FOOTBALL_PLAYERS');
     const collection = db.collection('players');
     collection.find(player).toArray((err, results) => {
+        console.log('err', err);
         resolve(results);
     });
 });

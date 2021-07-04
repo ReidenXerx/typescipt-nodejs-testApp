@@ -1,11 +1,10 @@
 "use strict";
+/* eslint-disable no-console */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.batchRequest = exports.insertDocs = exports.importDocs = void 0;
-/* eslint-disable no-console */
-/*eslint-disable */
 const url_1 = require("url");
 const connectorDb_1 = require("./connectorDb");
 const Route_1 = __importDefault(require("./server/Route"));
@@ -20,6 +19,8 @@ const importDocs = () => new Route_1.default('/import', ({ objectData: filterPla
                     statusText: 'Server successfully import players collection from DB...',
                 });
             }).catch((error) => {
+                // eslint-disable-next-line prefer-promise-reject-errors
+                console.log('error', error);
                 reject({
                     objectData: JSON.stringify(error),
                     statusText: 'Sorry, something went wrong',
@@ -28,6 +29,7 @@ const importDocs = () => new Route_1.default('/import', ({ objectData: filterPla
             });
         }
         else {
+            // eslint-disable-next-line prefer-promise-reject-errors
             reject({
                 objectData: '',
                 statusText: 'Duplicate request. Goodbye. Cancelling...',
@@ -42,7 +44,7 @@ const insertDocs = () => new Route_1.default('/insert', ({ objectData: arrayForI
         playersArray = JSON.parse(arrayForInsert);
         connectorDb_1.dbInsert(playersArray).then((playerInserted) => {
             resolve({
-                objectData: '',
+                objectData: JSON.stringify(playerInserted),
                 statusText: 'Server successfully created player and flash it in the DB...',
             });
         }).catch((error) => {
@@ -76,41 +78,41 @@ const batchRequest = (restrictedRoutes) => new RouteBatch_1.default('/batch', ({
             console.log(error);
         }
         console.log('arrayBatchSubRequests', arrayBatchSubRequests);
-        arrayBatchSubRequests.forEach((batchSubRequest) => {
+        arrayBatchSubRequests = arrayBatchSubRequests.map((batchSubRequest) => {
             console.log('batchSubRequest', batchSubRequest);
+            const batchSubRequestCopy = batchSubRequest;
             // convert from get request
             if (!batchSubRequest.payload) {
-                batchSubRequest.payload = JSON.stringify(url_1.parse(batchSubRequest.path, true).query);
-                batchSubRequest.path = url_1.parse(batchSubRequest.path, true).pathname;
+                batchSubRequestCopy.payload = JSON.stringify(url_1.parse(batchSubRequest.path, true).query);
+                batchSubRequestCopy.path = url_1.parse(batchSubRequest.path, true).pathname;
             }
             restrictedRoutes.forEach((restrictedRoute) => {
-                if (restrictedRoute.Path === batchSubRequest.path) {
+                if (restrictedRoute.Path === batchSubRequestCopy.path) {
                     batchSubRequestQueue.push({
-                        pathName: batchSubRequest.path,
+                        pathName: batchSubRequestCopy.path,
                         task: restrictedRoute.engage({
-                            objectData: batchSubRequest.payload,
+                            objectData: batchSubRequestCopy.payload,
                             statusText: '',
-                        })
+                        }),
                     });
                 }
             });
+            return batchSubRequestCopy;
         });
-        Promise.allSettled(batchSubRequestQueue.map((batchSubRequest) => {
-            return batchSubRequest.task;
-        })).then((results) => {
-            results.forEach((batchSubRequestResult, index) => {
-                if (batchSubRequestResult.status === 'fulfilled') {
+        Promise.allSettled(batchSubRequestQueue.map((batchSubRequest) => batchSubRequest.task)).then((results) => {
+            results.forEach((batchSubRequestResultedArray, index) => {
+                if (batchSubRequestResultedArray.status === 'fulfilled') {
                     batchSubRequestQueueResults.push({
                         pathName: batchSubRequestQueue[index].pathName,
                         statusText: 'Congratulations, your request was succeed',
-                        result: JSON.stringify(batchSubRequestResult.value),
+                        result: JSON.stringify(batchSubRequestResultedArray.value),
                     });
                 }
                 else { // rejected
                     batchSubRequestQueueResults.push({
                         pathName: batchSubRequestQueue[index].pathName,
                         statusText: 'Your request rejected',
-                        reason: JSON.stringify(batchSubRequestResult.reason),
+                        reason: JSON.stringify(batchSubRequestResultedArray.reason),
                     });
                 }
                 // add else with errors
@@ -122,6 +124,7 @@ const batchRequest = (restrictedRoutes) => new RouteBatch_1.default('/batch', ({
         });
     }
     else {
+        // eslint-disable-next-line prefer-promise-reject-errors
         reject({
             objectData: '',
             statusText: 'Duplicate request. Goodbye. Cancelling...',

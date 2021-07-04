@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { createServer, IncomingMessage } from 'http';
 import { parse, UrlWithParsedQuery } from 'url';
 import { ParsedUrlQuery } from 'querystring';
@@ -7,10 +6,9 @@ import Route from './Route';
 import { TransferDataWrapper } from '../interfaces';
 
 class Router {
-
     private routes: Array<Route> = [];
 
-    private port: number = parseInt(process.env.PORT || '1337');
+    private port: number = parseInt(process.env.PORT || '1337', 10);
 
     public addRoute(newRoute: Route) {
         this.routes.push(newRoute);
@@ -22,7 +20,7 @@ class Router {
 
     private server = createServer();
 
-    private collectRequestData(request: IncomingMessage) {
+    static collectRequestData(request: IncomingMessage) {
         return new Promise<string>((resolve) => {
             let insertedData = '';
             request.on('data', (chunk) => {
@@ -31,8 +29,7 @@ class Router {
             request.on('end', () => {
                 resolve(insertedData);
             });
-            
-        })
+        });
     }
 
     // + тела запроса нет только у гета, а также может не быть у делита
@@ -48,17 +45,12 @@ class Router {
         this.server.on('request', (request, response) => {
             const { url } = request;
             let urlObject: UrlWithParsedQuery | null = null;
-            let query: ParsedUrlQuery | string = ''; 
 
             if (url) {
                 urlObject = parse(url, true);
-                query = urlObject.query;
                 if (urlObject?.pathname) {
-                    
-                    this.collectRequestData(request).then((body: string) => {
-                        
+                    Router.collectRequestData(request).then((body: string) => {
                         if (body) {
-                        
                             this.routes.filter((route: Route) => {
                                 if (urlObject?.pathname === route.Path) {
                                     route.engage(
@@ -67,6 +59,7 @@ class Router {
                                             statusText: '',
                                         } as TransferDataWrapper,
                                     ).then((resultFromRoute: TransferDataWrapper) => {
+                                        // eslint-disable-next-line no-param-reassign
                                         route.lastRequestDataSetter = resultFromRoute.lastRequestData;
                                         response.write(
                                             JSON.stringify(resultFromRoute),
@@ -77,12 +70,12 @@ class Router {
                                             JSON.stringify(errorFromRoute),
                                         );
                                         response.end();
-                                    })
+                                    });
                                 }
                                 return null;
                             });
                         }
-                    })
+                    });
                 }
             }
         });
@@ -95,10 +88,9 @@ class Router {
             if (url) {
                 urlObject = parse(url, true);
                 query = urlObject.query;
-                
                 console.log('triggered', query);
-                if(urlObject.pathname) {
-                    this.collectRequestData(request).then((body: string) => {
+                if (urlObject.pathname) {
+                    Router.collectRequestData(request).then((body: string) => {
                         if (!body) {
                             this.routes.forEach((route: Route) => {
                                 if (urlObject?.pathname === route.Path) {
@@ -128,7 +120,7 @@ class Router {
         });
 
         this.server.listen(this.port);
-        console.log('Browse to http://127.0.0.1:' + this.port);
+        console.log(`Browse to http://127.0.0.1: + ${this.port}`);
     }
 }
 

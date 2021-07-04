@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --fix --ext .ts,.tsx src/",
-    "start": "PORT=1337 nodemon",
+    "start": "PORT=1337 MONGO='ec2-54-228-138-91.eu-west-1.compute.amazonaws.com:27017' nodemon",
     "build": "tsc --build"
   },
   "author": "",

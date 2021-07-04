@@ -22,5 +22,7 @@ sudo service nginx restart
 sudo systemctl start mongod
 npm run build
 cd build
+mongo
+use FOOTBALL_PLAYERS
+db.players.insert({name: "Mihail", secondName: "Giant", team: "teamless", birthday: "10.05.1995", online: true})
 node index.js NODE_ENV PORT=1337
-

@@ -1,0 +1,26 @@
+version: '3'
+
+networks:
+  mongo-node-bridge:
+    driver: bridge
+    
+services: 
+    web: 
+        image: reidenxerx/node-web-app
+        build: .
+        networks:
+            - mongo-node-bridge
+        command: "node /usr/src/app/build/index.js"
+        ports: 
+            - "1338:1338"
+        links:
+            - mongo
+    mongo:
+        container_name: mongo
+        image: reidenxerx/mongoimage
+        networks:
+            - mongo-node-bridge
+        volumes: 
+            - /Documents/typescipt-nodejs-testApp/mongo$:/bitnami/mongodb
+        ports: 
+            - "27017:27017"

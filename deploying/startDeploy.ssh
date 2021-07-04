@@ -2,3 +2,5 @@ chmod 400 ./keys/aws-mentoringProject-keys.pem
 ssh-add ./keys/aws-mentoringProject-keys.pem
 ssh ubuntu@ec2-54-228-138-91.eu-west-1.compute.amazonaws.com -yes
 
+second server
+http://ec2-13-51-172-135.eu-north-1.compute.amazonaws.com

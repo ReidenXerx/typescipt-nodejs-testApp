@@ -1,14 +1,18 @@
 import { MongoClient } from 'mongodb';
 import { InterfacePlayer, InterfacePlayerSelector } from './interfaces';
 
-const url = 'mongodb://localhost:27017/FOOTBALL_PLAYERS';
+// const url = `mongodb://localhost:27017/FOOTBALL_PLAYERS`;
+const url = `mongodb://${process.env.MONGO}/FOOTBALL_PLAYERS`;
 
 const mongoClient = new MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
 
-mongoClient.connect(() => {
+mongoClient.connect((error) => {
+    if (error) {
+        console.log('error', error);
+    }
     console.log('connected to database');
 });
 
@@ -16,6 +20,7 @@ const dbSelect = (player: InterfacePlayerSelector = {}) => new Promise<Array<Int
     const db = mongoClient.db('FOOTBALL_PLAYERS');
     const collection = db.collection('players');
     collection.find(player).toArray((err, results: Array<InterfacePlayer>) => {
+        console.log('err', err);
         resolve(results);
     });
 });

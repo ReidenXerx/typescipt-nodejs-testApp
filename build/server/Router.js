@@ -1,12 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/* eslint-disable */
 const http_1 = require("http");
 const url_1 = require("url");
 class Router {
     constructor() {
         this.routes = [];
-        this.port = parseInt(process.env.PORT || '1337');
+        this.port = parseInt(process.env.PORT || '1337', 10);
         this.server = http_1.createServer();
     }
     addRoute(newRoute) {
@@ -15,7 +14,7 @@ class Router {
     get Routes() {
         return this.routes;
     }
-    collectRequestData(request) {
+    static collectRequestData(request) {
         return new Promise((resolve) => {
             let insertedData = '';
             request.on('data', (chunk) => {
@@ -39,12 +38,10 @@ class Router {
         this.server.on('request', (request, response) => {
             const { url } = request;
             let urlObject = null;
-            let query = '';
             if (url) {
                 urlObject = url_1.parse(url, true);
-                query = urlObject.query;
                 if (urlObject === null || urlObject === void 0 ? void 0 : urlObject.pathname) {
-                    this.collectRequestData(request).then((body) => {
+                    Router.collectRequestData(request).then((body) => {
                         if (body) {
                             this.routes.filter((route) => {
                                 if ((urlObject === null || urlObject === void 0 ? void 0 : urlObject.pathname) === route.Path) {
@@ -52,6 +49,7 @@ class Router {
                                         objectData: body,
                                         statusText: '',
                                     }).then((resultFromRoute) => {
+                                        // eslint-disable-next-line no-param-reassign
                                         route.lastRequestDataSetter = resultFromRoute.lastRequestData;
                                         response.write(JSON.stringify(resultFromRoute));
                                         response.end();
@@ -76,7 +74,7 @@ class Router {
                 query = urlObject.query;
                 console.log('triggered', query);
                 if (urlObject.pathname) {
-                    this.collectRequestData(request).then((body) => {
+                    Router.collectRequestData(request).then((body) => {
                         if (!body) {
                             this.routes.forEach((route) => {
                                 if ((urlObject === null || urlObject === void 0 ? void 0 : urlObject.pathname) === route.Path) {
@@ -99,7 +97,7 @@ class Router {
             }
         });
         this.server.listen(this.port);
-        console.log('Browse to http://127.0.0.1:' + this.port);
+        console.log(`Browse to http://127.0.0.1: + ${this.port}`);
     }
 }
 exports.default = Router;

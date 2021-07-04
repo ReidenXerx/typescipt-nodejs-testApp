@@ -1,0 +1,7 @@
+sudo docker run -it -p 1338:1338 reidenxerx/node-web-app
+sudo docker build . -t reidenxerx/node-web-app
+sudo docker run -d -p 27017:27017 -v ~/mongodb:/data/db --name mongoServer mongo:latest
+sudo docker run --name mongodb-server --rm --network mongo-node-bridge mongo:latest
+sudo docker run --name mongodb-server --rm --network mongo-node-bridge  bitnami/mongodb:latest
+sudo docker run -it --name mongodb-server --rm --network mongo-node-bridge -p 1338:1338 reidenxerx/node-web-app
+docker network create mongo-node-bridge --driver bridge

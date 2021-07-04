@@ -1,0 +1,4 @@
+sudo docker run -d -p 27017:27017 -v ~/mongodb:/data/db --name mongoServer mongo:latest
+docker exec -it mongoServer bash
+sudo docker run -it -p 1338:1338 reidenxerx/node-web-app
+
